@@ -40,64 +40,8 @@
 
 (add-to-list 'load-path "~/.emacs.d/elisp")
 
-;; Martin Cracauer wrote some code which emulates the SELECT key from a
-;; Symbolics Lisp machine.  This is Ted's adaptation.
-
-(defvar stesla-select-prefix-map (make-sparse-keymap))
-(defvar stesla-select-prefix [f8])
-
-(defun stesla-select-set-prefix (prefix)
-  (global-unset-key stesla-select-prefix)
-  (setq stesla-select-prefix prefix)
-  (global-set-key stesla-select-prefix stesla-select-prefix-map))
-(stesla-select-set-prefix stesla-select-prefix)
-
-(defun stesla-select-display-bindings ()
-  (interactive)
-  (describe-bindings stesla-select-prefix))
-
-(define-key stesla-select-prefix-map "?" 'stesla-select-display-bindings)
-
-
-(defmacro stesla-select-define-key (fname-base key &optional buf-form else-form)
-  "Define a select-key function FNAME-BASE bound on KEY.
-
-If provided, BUF-FORM should be a form which will attempt to return
-a buffer to switch to.  If it returns nil, ELSE-FORM is evaluated."
-  (let ((fname (intern (concat "stesla-select-" (symbol-name fname-base)))))
-    `(progn
-       (defun ,fname (arg)
-         (interactive "P")
-         (let ((buf ,buf-form))
-           (if buf
-               (switch-to-buffer buf)
-             ,else-form)))
-       (define-key stesla-select-prefix-map ,key ',fname))))
-
-(put 'stesla-select-define-key 'lisp-indent-function 2)
-
-;; For easy access to a few commonly accessed files/buffers.
-
 (defconst stesla-dotemacs-file "~/.emacs.d/init.el")
-(stesla-select-define-key dotemacs-file "."
-  (find-buffer-visiting stesla-dotemacs-file)
-  (find-file stesla-dotemacs-file))
 
-(stesla-select-define-key home-directory "~"
-  (find-buffer-visiting "~")
-  (dired "~"))
-;; That ~ key is impossible to type...
-(define-key stesla-select-prefix-map "`" 'stesla-select-home-directory)
-
-(stesla-select-define-key info "i"
-  (find-buffer-visiting "*info*")
-  (info))
-
-(stesla-select-define-key shell "!"
-  (find-buffer-visiting "*eshell*")
-  (eshell))
-
-;; Default some files to built-in modes
 (mapcar (lambda (mapping) (add-to-list 'auto-mode-alist mapping))
         '(("\\.dtd$" . xml-mode)
           ("\\.ebuild$" . sh-mode)
@@ -119,7 +63,7 @@ If TEST is nil, return nil."
   "This is Ted O'Connor's non-erroring version of (require PACKAGE)."
   (condition-case nil (require package) (error nil)))
 
-;;; Applications
+;;; Modes
 
 ;; This is necessary for ruby-mode to define it's font-locking stuff.  I'm
 ;; going to define it here, though, before all of my modes.
@@ -186,6 +130,26 @@ From Kevin Rodgers <kevin@ihs.com>"
 ;;; emacs-lisp-mode
 
 (put 'shell-command-on-region 'lisp-indent-function 2)
+
+;;; stesla-select-mode
+
+(when (require-no-error 'stesla-select)
+  (stesla-select-define-key dotemacs-file "."
+			    (find-buffer-visiting stesla-dotemacs-file)
+			    (find-file stesla-dotemacs-file))
+
+  (stesla-select-define-key home-directory "~"
+			    (find-buffer-visiting "~")
+			    (dired "~"))
+  (stesla-select-map-key "`" stesla-select-home-directory)
+
+  (stesla-select-define-key info "i"
+			    (find-buffer-visiting "*info*")
+			    (info))
+
+  (stesla-select-define-key shell "!"
+			    (find-buffer-visiting "*eshell*")
+			    (eshell)))
 
 ;; tex-mode customizations
 
