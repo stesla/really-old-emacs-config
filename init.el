@@ -33,7 +33,7 @@
 (setq confirm-kill-emacs 'yes-or-no-p)
 (random t)                              ; reseed
 ;(server-start)
-;(global-auto-revert-mode 1)
+(global-auto-revert-mode 1)
 
 (setq make-backup-files t)
 (setq backup-directory-alist '((".*" . "~/.emacs.d/backup")))
