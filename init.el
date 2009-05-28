@@ -43,20 +43,23 @@
 ;; Martin Cracauer wrote some code which emulates the SELECT key from a
 ;; Symbolics Lisp machine.  This is Ted's adaptation.
 
-(defvar stesla-f8-prefix-map (make-sparse-keymap))
-(global-set-key [f8] stesla-f8-prefix-map)
-(defvar stesla-select-prefix-map stesla-f8-prefix-map)
+(defvar stesla-select-prefix-map (make-sparse-keymap))
+(defvar stesla-select-prefix [f8])
 
-(global-set-key [menu] stesla-select-prefix-map)
-(global-set-key [apps] stesla-select-prefix-map)
+(defun stesla-select-set-prefix (prefix)
+  (global-unset-key stesla-select-prefix)
+  (setq stesla-select-prefix prefix)
+  (global-set-key stesla-select-prefix stesla-select-prefix-map))
+(stesla-select-set-prefix stesla-select-prefix)
 
-(defun stesla-display-select-bindings ()
+(defun stesla-select-display-bindings ()
   (interactive)
-  (describe-bindings [f8]))
+  (describe-bindings stesla-select-prefix))
 
-(define-key stesla-select-prefix-map "?" 'stesla-display-select-bindings)
+(define-key stesla-select-prefix-map "?" 'stesla-select-display-bindings)
 
-(defmacro stesla-define-select-key (fname-base key &optional buf-form else-form)
+
+(defmacro stesla-select-define-key (fname-base key &optional buf-form else-form)
   "Define a select-key function FNAME-BASE bound on KEY.
 
 If provided, BUF-FORM should be a form which will attempt to return
@@ -71,57 +74,28 @@ a buffer to switch to.  If it returns nil, ELSE-FORM is evaluated."
              ,else-form)))
        (define-key stesla-select-prefix-map ,key ',fname))))
 
-(put 'stesla-define-select-key 'lisp-indent-function 2)
-
-(defmacro stesla-define-select-key-class (fname-base key extension &optional default-dir)
-  `(stesla-define-select-key ,(intern (concat (symbol-name fname-base) "-file")) ,key
-     (let ((buffers (buffer-list))
-           (buffer t))
-       (while (and buffers
-                   (listp buffers))
-         (setq buffer (car buffers))
-         (setq buffers (cdr buffers))
-         (if (string-match ,extension (buffer-name buffer))
-             (setq buffers nil)
-           (setq buffer nil)))
-       buffer)
-     (find-file
-      (read-file-name ,(concat "Find " (symbol-name fname-base) " file: ")
-                      ,default-dir))))
-
-;; These are the file types I use at least semi-regularly.
-
-(stesla-define-select-key-class C        "c" "\\.c$" "~/Projects/")
-(stesla-define-select-key-class Emacs-Lisp "e" "\\.el$"     "~/.elisp/")
-(stesla-define-select-key-class C-Header "h" "\\.h$" "~/Projects/")
-(stesla-define-select-key-class Lisp       "l" "\\.\\(lisp\\|lsp\\)$")
-(stesla-define-select-key-class LaTeX      "t" "\\.tex$")
-(stesla-define-select-key-class Makefile   "M" "\\(GNU\\)?[Mm]akefile")
-(stesla-define-select-key-class m4         "4" "\\.m4$")
+(put 'stesla-select-define-key 'lisp-indent-function 2)
 
 ;; For easy access to a few commonly accessed files/buffers.
 
 (defconst stesla-dotemacs-file "~/.emacs.d/init.el")
-(stesla-define-select-key dotemacs-file "."
+(stesla-select-define-key dotemacs-file "."
   (find-buffer-visiting stesla-dotemacs-file)
   (find-file stesla-dotemacs-file))
 
-(stesla-define-select-key home-directory "~"
+(stesla-select-define-key home-directory "~"
   (find-buffer-visiting "~")
   (dired "~"))
 ;; That ~ key is impossible to type...
 (define-key stesla-select-prefix-map "`" 'stesla-select-home-directory)
 
-(stesla-define-select-key info "i"
+(stesla-select-define-key info "i"
   (find-buffer-visiting "*info*")
   (info))
 
-(stesla-define-select-key shell "!"
+(stesla-select-define-key shell "!"
   (find-buffer-visiting "*eshell*")
   (eshell))
-
-(stesla-define-select-key gnus "g"
-  (gnus))
 
 ;; Default some files to built-in modes
 (mapcar (lambda (mapping) (add-to-list 'auto-mode-alist mapping))
