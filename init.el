@@ -38,31 +38,25 @@
 (setq make-backup-files t)
 (setq backup-directory-alist '((".*" . "~/.emacs.d/backup")))
 
-(add-to-list 'load-path "~/.emacs.d/elisp")
-
 (defconst stesla-dotemacs-file "~/.emacs.d/init.el")
-
-(mapcar (lambda (mapping) (add-to-list 'auto-mode-alist mapping))
-        '(("\\.dtd$" . xml-mode)
-          ("\\.ebuild$" . sh-mode)
-          ("\\.xml$" . xml-mode)
-          ("\\.yml$" . conf-mode)
-          ("bash_profile$" . sh-mode)
-          ("bashrc$" . sh-mode)))
-
-(if (not (fboundp 'when))
-    (progn
-      (defmacro when (test &rest body)
-    "If TEST is non-nil, evaluate the forms in BODY.
-If TEST is nil, return nil."
-    `(if ,test
-         (progn ,@body)
-       nil))))
 
 (defun require-no-error (package)
   "This is Ted O'Connor's non-erroring version of (require PACKAGE)."
   (condition-case nil (require package) (error nil)))
 
+(add-to-list 'load-path "~/.emacs.d/elisp")
+
 (load "~/.emacs.d/appearance.el")
 (load "~/.emacs.d/modes.el")
 (load "~/.emacs.d/local.el" t)
+
+(mapcar (lambda (mapping) (add-to-list 'auto-mode-alist mapping))
+        '(("Rakefile" . ruby-mode)
+          ("\\.ebuild$" . sh-mode)
+          ("\\.rake$" . ruby-mode)
+          ("\\.ru$" . ruby-mode)
+          ("\\.xml$" . xml-mode)
+          ("\\.yml$" . conf-mode)
+          ("bash_profile$" . sh-mode)
+          ("bashrc$" . sh-mode)
+          ("\\.dtd$" . xml-mode)))

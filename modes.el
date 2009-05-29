@@ -62,7 +62,24 @@ From Kevin Rodgers <kevin@ihs.com>"
 
 (put 'shell-command-on-region 'lisp-indent-function 2)
 
+;;; ido-mode
+;; Gives us fancy tab completion and whatnot. iswitchb is dead, long live ido.
+
+(when (require-no-error 'ido)
+  (ido-mode t)
+  (setq ido-enable-flex-matching t)
+
+  (add-hook
+   'ido-setup-hook
+   (lambda ()
+     (define-key ido-completion-map " " 'ido-next-match))))
+
+;;; line numbers
+(when (require-no-error 'linum)
+  (global-linum-mode 1))
+
 ;;; stesla-select-mode
+;; Bind [f8] to a keymap for summoning commonly used buffers.
 
 (when (require-no-error 'stesla-select)
   (stesla-select-define-key dotemacs-file "."
@@ -94,3 +111,7 @@ From Kevin Rodgers <kevin@ihs.com>"
     (setq compile-command (stesla-latex-compile-command (buffer-file-name))))
 
   (add-hook 'latex-mode-hook 'stesla-latex-compile-hook))
+
+;;; uniquify
+(when (require-no-error 'uniquify)
+  (setq uniquify-buffer-name-style 'post-forward))
