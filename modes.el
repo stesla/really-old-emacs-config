@@ -74,10 +74,6 @@ From Kevin Rodgers <kevin@ihs.com>"
    (lambda ()
      (define-key ido-completion-map " " 'ido-next-match))))
 
-;;; line numbers
-(when (require-no-error 'linum)
-  (global-linum-mode 1))
-
 ;;; stesla-select-mode
 ;; Bind [f8] to a keymap for summoning commonly used buffers.
 
