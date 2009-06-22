@@ -34,6 +34,8 @@
 (random t)                              ; reseed
 ;(server-start)
 (global-auto-revert-mode 1)
+(show-paren-mode 1)
+(setq-default show-trailing-whitespace t)
 
 (setq make-backup-files t)
 (setq backup-directory-alist '((".*" . "~/.emacs.d/backup")))
@@ -60,3 +62,19 @@
           ("bash_profile$" . sh-mode)
           ("bashrc$" . sh-mode)
           ("\\.dtd$" . xml-mode)))
+
+(global-set-key (kbd "C-c l") 'goto-line)
+
+(defun stesla-hide-trailing-whitespace ()
+  "Turn off trailing whitespace highlighting in this buffer."
+  (interactive)
+  (setq show-trailing-whitespace nil))
+
+(mapc (lambda (mode-hook)
+        (add-hook mode-hook 'stesla-hide-trailing-whitespace))
+      '(Buffer-menu-mode-hook
+        custom-mode-hook term-mode-hook Info-mode-hook
+        comint-mode-hook buffer-menu-mode-hook apropos-mode-hook
+        tooltip-show-hook gnus-article-mode-hook mail-mode-hook
+        gnus-summary-mode-hook message-mode-hook gnus-group-mode-hook
+        eshell-mode-hook w3-mode-hook w3m-mode-hook help-modeq))
